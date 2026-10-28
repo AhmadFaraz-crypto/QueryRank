@@ -36,9 +36,15 @@ export function AuthShell({ children }: { children: ReactNode }) {
         <div className={styles.foot}>
           <span>© 2026 QueryRank</span>
           <span>
-            <a onClick={(e) => e.preventDefault()}>Privacy</a>
-            <a onClick={(e) => e.preventDefault()}>Terms</a>
-            <a onClick={(e) => e.preventDefault()}>Help</a>
+            <a href="https://getqueryrank.com/privacy/" target="_blank" rel="noreferrer noopener">
+              Privacy
+            </a>
+            <a href="https://getqueryrank.com/terms/" target="_blank" rel="noreferrer noopener">
+              Terms
+            </a>
+            <a href="https://github.com/AhmadFaraz-crypto/QueryRank" target="_blank" rel="noreferrer noopener">
+              Help
+            </a>
           </span>
         </div>
       </div>

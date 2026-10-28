@@ -64,8 +64,9 @@ auth.get('/google/callback', async (c) => {
     const info = await fetchUserInfo(tokens.access_token)
     const email = (info.email ?? '').toLowerCase()
 
-    // Single-user gate: only the configured owner may enter.
-    if (!email || email !== env.ALLOWED_EMAIL.toLowerCase()) {
+    // Require a verified email; when ALLOWED_EMAIL is set, restrict to it
+    // (single-user). When unset, any Google account may sign in.
+    if (!email || (env.ALLOWED_EMAIL && email !== env.ALLOWED_EMAIL.toLowerCase())) {
       return c.redirect(`${env.OAUTH_REDIRECT_BASE}/?auth=forbidden`)
     }
 
@@ -112,7 +113,9 @@ auth.post('/register', async (c) => {
   if (typeof password !== 'string' || password.length < MIN_PASSWORD) {
     return c.json({ error: `Password must be at least ${MIN_PASSWORD} characters.` }, 400)
   }
-  if (em !== env.ALLOWED_EMAIL.toLowerCase()) {
+  // When ALLOWED_EMAIL is set this is a single-user instance; otherwise anyone
+  // may register.
+  if (env.ALLOWED_EMAIL && em !== env.ALLOWED_EMAIL.toLowerCase()) {
     return c.json({ error: 'This instance is restricted to its owner’s email.' }, 403)
   }
 

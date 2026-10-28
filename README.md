@@ -173,7 +173,7 @@ All server configuration lives in `apps/server/.env` (copy from `.env.example`):
 | ---------------------- | -------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | `DATABASE_URL`         | Yes      | —                       | Postgres connection string. Docker default: `postgres://queryrank:queryrank@localhost:5433/queryrank`.                           |
 | `APP_SECRET`           | Yes      | —                       | Long random string — signs session cookies and encrypts stored OAuth tokens (AES-256-GCM).                                       |
-| `ALLOWED_EMAIL`        | Yes      | —                       | The only email allowed to register / sign in (single-user).                                                                      |
+| `ALLOWED_EMAIL`        | No       | — (open signup)         | When set, only this email may register / sign in (single-user). Leave blank for **open signup** — anyone can create an account.   |
 | `PORT`                 | No       | `3000`                  | Port the API server listens on.                                                                                                  |
 | `OAUTH_REDIRECT_BASE`  | No       | `http://localhost:5173` | Public origin used to build OAuth redirect URIs and the password-reset link. Set to your domain in production.                   |
 | `GOOGLE_CLIENT_ID`     | No       | —                       | Google OAuth client ID. Needed only for Google sign-in and connecting GSC/GA4.                                                   |
@@ -181,8 +181,9 @@ All server configuration lives in `apps/server/.env` (copy from `.env.example`):
 | `RESEND_API_KEY`       | No       | —                       | [Resend](https://resend.com) API key — enables password-reset emails. Unset → reset link is logged to the server console in dev. |
 | `EMAIL_FROM`           | No       | —                       | Verified sender for reset emails, e.g. `QueryRank <noreply@yourdomain.com>`.                                                     |
 
-Only the three **Required** vars are needed to run (email/password sign-in + CSV
-import). Add Google for live data, and Resend for password-reset emails.
+Only `DATABASE_URL` and `APP_SECRET` are needed to run (email/password sign-in +
+CSV import). Set `ALLOWED_EMAIL` to lock the instance to one user, or leave it
+blank for open signup. Add Google for live data, and Resend for reset emails.
 
 ### Deploying to production
 

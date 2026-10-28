@@ -9,7 +9,9 @@ function required(name: string): string {
 export const env = {
   DATABASE_URL: required('DATABASE_URL'),
   APP_SECRET: required('APP_SECRET'),
-  ALLOWED_EMAIL: required('ALLOWED_EMAIL'),
+  // Optional access gate. When set, only this email may register / sign in
+  // (single-user instance). When unset/empty, signup is OPEN to anyone.
+  ALLOWED_EMAIL: process.env.ALLOWED_EMAIL ?? '',
   OAUTH_REDIRECT_BASE: process.env.OAUTH_REDIRECT_BASE ?? 'http://localhost:5173',
   PORT: Number(process.env.PORT ?? 3000),
   NODE_ENV: process.env.NODE_ENV ?? 'development',
