@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url'
 import { drizzle } from 'drizzle-orm/postgres-js'
 import { migrate } from 'drizzle-orm/postgres-js/migrator'
 import postgres from 'postgres'
+import { pgConnection } from './socket'
 
 const migrationsFolder = join(
   dirname(fileURLToPath(import.meta.url)),
@@ -21,10 +22,11 @@ const migrationsFolder = join(
  * "create it manually" hint if this throws.
  */
 export async function ensureDatabase(databaseUrl: string): Promise<void> {
-  const dbName = new URL(databaseUrl).pathname.replace(/^\//, '')
+  const { url, options } = pgConnection(databaseUrl)
+  const dbName = new URL(url).pathname.replace(/^\//, '')
   if (!dbName) throw new Error('DATABASE_URL has no database name')
 
-  const probe = postgres(databaseUrl, { max: 1, onnotice: () => {} })
+  const probe = postgres(url, { max: 1, onnotice: () => {}, ...options })
   try {
     await probe`select 1`
     return // database exists — nothing to do
@@ -34,9 +36,9 @@ export async function ensureDatabase(databaseUrl: string): Promise<void> {
     await probe.end({ timeout: 5 }).catch(() => {})
   }
 
-  const adminUrl = new URL(databaseUrl)
+  const adminUrl = new URL(url)
   adminUrl.pathname = '/postgres'
-  const admin = postgres(adminUrl.toString(), { max: 1, onnotice: () => {} })
+  const admin = postgres(adminUrl.toString(), { max: 1, onnotice: () => {}, ...options })
   try {
     const exists = await admin`select 1 from pg_database where datname = ${dbName}`
     if (exists.length === 0) {
@@ -53,7 +55,8 @@ export async function ensureDatabase(databaseUrl: string): Promise<void> {
 
 /** Apply any pending Drizzle migrations (creates/updates tables on boot). */
 export async function runMigrations(databaseUrl: string): Promise<void> {
-  const sql = postgres(databaseUrl, { max: 1, onnotice: () => {} })
+  const { url, options } = pgConnection(databaseUrl)
+  const sql = postgres(url, { max: 1, onnotice: () => {}, ...options })
   try {
     await migrate(drizzle(sql), { migrationsFolder })
   } finally {

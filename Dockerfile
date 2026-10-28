@@ -11,10 +11,8 @@ WORKDIR /app
 # ---- deps: install the whole workspace (cached on manifests) -----------------
 FROM base AS deps
 COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
-COPY packages/core/package.json ./packages/core/
 COPY packages/adapters/package.json ./packages/adapters/
-COPY packages/react/package.json ./packages/react/
-COPY packages/editor/package.json ./packages/editor/
+COPY packages/cli/package.json ./packages/cli/
 COPY apps/playground/package.json ./apps/playground/
 COPY apps/server/package.json ./apps/server/
 RUN pnpm install --frozen-lockfile
