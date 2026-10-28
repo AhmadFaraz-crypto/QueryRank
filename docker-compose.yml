@@ -1,0 +1,58 @@
+# QueryRank — full self-hosted stack.
+#
+#   Production:   docker compose up            # builds the app + starts Postgres
+#   Dev (DB only): docker compose up postgres  # run `pnpm dev` on the host
+#
+# Copy .env.example to .env and fill in the secrets first (APP_SECRET,
+# ALLOWED_EMAIL, and your own Google OAuth credentials).
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: queryrank-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: queryrank
+      POSTGRES_PASSWORD: queryrank
+      POSTGRES_DB: queryrank
+    # Host port 5433 (not 5432) to avoid clashing with a local/Homebrew Postgres.
+    # Only needed for host tools (psql, Drizzle Studio); the app talks to it over
+    # the internal Docker network on 5432.
+    ports:
+      - '5433:5432'
+    volumes:
+      - queryrank-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U queryrank']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    container_name: queryrank-app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # Talks to the postgres service over the internal network (port 5432).
+      DATABASE_URL: postgres://queryrank:queryrank@postgres:5432/queryrank
+      NODE_ENV: production
+      PORT: 3000
+      # The public URL the app is reached at — used for OAuth redirects.
+      OAUTH_REDIRECT_BASE: ${OAUTH_REDIRECT_BASE:-http://localhost:3000}
+      # Secrets (from your .env — see .env.example).
+      APP_SECRET: ${APP_SECRET:?set APP_SECRET in .env}
+      ALLOWED_EMAIL: ${ALLOWED_EMAIL:?set ALLOWED_EMAIL in .env}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+    ports:
+      - '${APP_PORT:-3000}:3000'
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://localhost:3000/api/health || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  queryrank-pgdata:

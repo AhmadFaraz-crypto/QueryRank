@@ -1,0 +1,111 @@
+:root {
+  // Force a light theme regardless of the OS/browser preference.
+  color-scheme: light;
+
+  /* =====================================================================
+     QueryRank design tokens — "Precision grey" identity.
+     A calibrated cool-graphite instrument frame: colour lives in the data,
+     the chrome stays quiet. Change these to re-brand the whole product.
+     ===================================================================== */
+  --ink: #171a1f; // deliberate graphite: headings + body text
+
+  // Primary buttons match the dark-grey sidebar (#272c35) for one cohesive
+  // accent across the whole product; hover deepens slightly.
+  --accent: #272c35; // primary actions (same grey as the sidebar)
+  --ink-2: #333945; // raised dark element
+  --accent-grad: linear-gradient(150deg, #2f343e, #222730);
+  --midnight: #272c35; // alias kept for existing refs
+  --midnight-2: #333945;
+  --accent-600: #1c2029; // primary hover: slightly darker
+  --accent-50: #eceef1; // selected tint (cool)
+  --accent-100: #dce0e5;
+
+  // Clean two-tone: WHITE content + one light-grey chrome frame. Structure comes
+  // from crisp hairlines, not fills or shadows — so nothing reads as muddy.
+  --bg: #ffffff; // app canvas / content: white
+  --surface: #ffffff; // cards + panels + popovers
+  --surface-2: #f5f6f8; // subtle fills: inputs, hovers, chips
+  --chrome: #eef0f3; // the one grey: nav rail, top bar, side panel frame
+  --line: #e4e7eb; // the primary structural device — crisp hairline
+  --line-2: #eef0f3;
+  --text: #171a1f;
+  --text-2: #4e555f;
+  --muted: #878e99;
+
+  // Functional "live / connected" signal — a deep desaturated teal that reads
+  // like a hardware status light. Used ONLY for live-source dots + focus rings.
+  --signal: #1f6d73;
+  --signal-50: #e4eff0;
+
+  --pos: #0e9f6e;
+  --pos-ink: #047857;
+  --pos-bg: #e7f7f0;
+  --neg: #e5484d;
+  --neg-ink: #b42318;
+  --neg-bg: #fdecec;
+
+  // categorical chart palette
+  --c1: #ff6b5b;
+  --c2: #1e1b4b;
+  --c3: #fdba74;
+  --c4: #5b54b8;
+  --c5: #2bb3a3;
+  --c6: #f43f5e;
+
+  --radius: 10px;
+  // Flat by default: surfaces are separated by hairlines, not shadows — so there
+  // are no shadows "on every corner". A real shadow is reserved for genuine
+  // overlays (modals, popovers, dropdowns) where elevation is meaningful.
+  --shadow-sm: none;
+  --shadow: none;
+  --shadow-lg: 0 16px 40px -12px rgba(23, 26, 31, 0.22);
+
+  // Legacy tokens (still referenced by the first-gen screens).
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-border: var(--line);
+  --color-text: var(--text);
+  --color-text-muted: var(--muted);
+  --color-text-strong: var(--text);
+  --color-accent: var(--accent);
+  --color-accent-text: #ffffff;
+  --color-code-bg: #111827;
+  --color-code-text: #f3f4f6;
+
+  --radius-md: 0.5rem;
+  --radius-sm: 0.375rem;
+
+  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+    Helvetica, Arial, sans-serif;
+  --font-mono:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  // The signature: engineered figures. Tabular lining numerals + slashed zero
+  // + single-story 'a' turn Inter into a precise, data-instrument face — every
+  // metric, rank and percentage aligns in a column. Grounded in rank-tracking.
+  font-feature-settings: 'tnum' 1, 'zero' 1, 'cv05' 1;
+  letter-spacing: -0.006em;
+}
+
+#root {
+  min-height: 100vh;
+}

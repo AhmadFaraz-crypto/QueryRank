@@ -1,0 +1,19 @@
+{
+  "name": "@queryrank/adapters",
+  "version": "0.0.0",
+  "description": "Google Search Console and Google Analytics 4 API clients used by the QueryRank server.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2",
+    "vitest": "^3.0.0"
+  }
+}

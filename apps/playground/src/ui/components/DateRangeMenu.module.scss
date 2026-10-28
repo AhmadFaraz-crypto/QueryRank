@@ -1,0 +1,205 @@
+/* Per-card date-range picker: a themed trigger chip + a light two-pane popover
+ * (portaled to <body>, so it reads consistently over any dashboard theme). */
+
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 22px;
+  padding: 0 8px;
+  font-size: 11.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--card-muted);
+  background: var(--card-chip);
+  border: 1px solid var(--card-line);
+  border-radius: 999px;
+  cursor: pointer;
+  transition:
+    color 0.12s ease,
+    border-color 0.12s ease,
+    background 0.12s ease;
+
+  svg {
+    opacity: 0.7;
+    transition: transform 0.15s ease;
+  }
+  &:hover {
+    color: var(--card-ink);
+    border-color: color-mix(in srgb, var(--card-ink) 28%, transparent);
+  }
+  &.open {
+    color: var(--card-ink);
+    svg {
+      transform: rotate(180deg);
+    }
+  }
+  &.md {
+    height: 28px;
+    font-size: 12.5px;
+    padding: 0 11px;
+  }
+}
+
+.pop {
+  position: fixed;
+  z-index: 1000;
+  display: flex;
+  width: 360px;
+  background: #ffffff;
+  border: 1px solid #e6e8ee;
+  border-radius: 14px;
+  box-shadow:
+    0 12px 40px rgba(16, 24, 40, 0.18),
+    0 2px 6px rgba(16, 24, 40, 0.06);
+  overflow: hidden;
+  animation: dpop 0.13s ease-out;
+  color: #111827;
+}
+
+@keyframes dpop {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+.groups {
+  flex: 0 0 132px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px;
+  background: #f7f8fa;
+  border-right: 1px solid #edeff3;
+}
+
+.group {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #4b5563;
+  font-size: 13px;
+  font-weight: 550;
+  cursor: pointer;
+  text-align: left;
+  transition:
+    background 0.12s ease,
+    color 0.12s ease;
+
+  svg {
+    opacity: 0;
+    color: #9aa1ad;
+    transition: opacity 0.12s ease;
+  }
+  &:hover {
+    background: #eef0f4;
+    color: #111827;
+  }
+  &.active {
+    background: #ffffff;
+    color: #111827;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08);
+    svg {
+      opacity: 1;
+    }
+  }
+}
+
+.options {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px;
+  min-width: 0;
+  max-height: 264px;
+  overflow-y: auto;
+}
+
+.opt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 9px 11px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #374151;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+
+  svg {
+    color: #4f46e5;
+    flex: none;
+  }
+  &:hover {
+    background: #f1f3f7;
+    color: #111827;
+  }
+  &.sel {
+    color: #4f46e5;
+    font-weight: 650;
+    background: #eef0ff;
+  }
+}
+
+.custom {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 12px 14px;
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #6b7280;
+  }
+  input {
+    height: 34px;
+    padding: 0 10px;
+    border: 1px solid #dfe2e9;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #111827;
+    background: #fff;
+    font-family: inherit;
+
+    &:focus {
+      outline: none;
+      border-color: #4f46e5;
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+    }
+  }
+}
+
+.apply {
+  margin-top: 2px;
+  height: 36px;
+  border: 0;
+  border-radius: 9px;
+  background: #4f46e5;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.12s ease;
+
+  &:hover {
+    background: #4338ca;
+  }
+  &:disabled {
+    background: #c7cad3;
+    cursor: not-allowed;
+  }
+}

@@ -1,0 +1,10 @@
+node_modules
+**/node_modules
+**/dist
+.git
+.github
+*.log
+# never bake secrets into the image — compose injects env at runtime
+apps/server/.env
+.env
+.claude

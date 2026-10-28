@@ -1,0 +1,49 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  max-width: 420px;
+  margin: 90px auto;
+
+  svg {
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  h3 {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 650;
+    color: var(--ink);
+  }
+  p {
+    margin: 0;
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--muted);
+  }
+}
+
+// Fullscreen variant — the route guard's "server unreachable at boot" case.
+.full {
+  min-height: 100vh;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.retry {
+  margin-top: 10px;
+  padding: 9px 18px;
+  border: 0;
+  border-radius: 9px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.92;
+  }
+}

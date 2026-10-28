@@ -1,0 +1,46 @@
+{
+  "name": "QueryRank",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Open-source, self-hosted analytics dashboards for Google Search Console and GA4 — connect with your own keys or import a CSV, and keep your data on your server.",
+  "license": "MIT",
+  "type": "module",
+  "packageManager": "pnpm@10.2.1",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @queryrank/playground dev",
+    "dev:server": "pnpm --filter @queryrank/server dev",
+    "dev:all": "pnpm --parallel --filter @queryrank/playground --filter @queryrank/server dev",
+    "db:push": "pnpm --filter @queryrank/server db:push",
+    "db:studio": "pnpm --filter @queryrank/server db:studio",
+    "cli": "pnpm --filter @queryrank/cli exec tsx src/index.ts",
+    "build": "pnpm --filter @queryrank/playground build",
+    "preview": "pnpm --filter @queryrank/playground preview",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "pnpm -r typecheck",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "@types/node": "^22.10.0",
+    "eslint": "^9.17.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "eslint-plugin-react-refresh": "^0.4.16",
+    "globals": "^15.14.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.18.0",
+    "vitest": "^3.0.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  }
+}

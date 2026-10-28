@@ -1,0 +1,210 @@
+.app {
+  display: grid;
+  grid-template-columns: 248px 1fr;
+  height: 100vh;
+  overflow: hidden;
+}
+
+// Full-screen workspace (the designer): no app nav, content fills the width.
+.app.full {
+  grid-template-columns: 1fr;
+}
+
+/* Wide labeled sidebar: a dark-grey frame with a brand header, labeled nav rows
+   (the active row is a white "item" that pops on the dark), and the account at
+   the bottom. */
+.sidebar {
+  background: #272c35;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 14px 12px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px 16px;
+}
+
+.brandMark {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  display: grid;
+  place-items: center;
+  color: #fff;
+}
+
+.wordmark {
+  font-size: 16px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  color: #fff;
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.navItem {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 11px;
+  border-radius: 9px;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition:
+    background 0.12s,
+    color 0.12s;
+
+  svg {
+    flex-shrink: 0;
+    color: rgba(255, 255, 255, 0.52);
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+
+    svg {
+      color: rgba(255, 255, 255, 0.8);
+    }
+  }
+
+  // Active row = a white "item" that pops against the dark sidebar.
+  &.active {
+    background: #fff;
+    color: var(--ink);
+    font-weight: 600;
+
+    svg {
+      color: var(--ink);
+    }
+  }
+}
+
+/* account at the bottom */
+.foot {
+  margin-top: auto;
+  position: relative;
+  padding-top: 10px;
+}
+
+.user {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 9px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+  text-align: left;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.22);
+  }
+}
+
+.avatar {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 650;
+  display: grid;
+  place-items: center;
+}
+
+.userInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+
+  b {
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  small {
+    font-size: 11.5px;
+    color: rgba(255, 255, 255, 0.55);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.chev {
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.acct {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(100% + 6px);
+  z-index: 130;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  padding: 6px;
+  display: none;
+
+  &.acctOn {
+    display: block;
+    animation: acctIn 0.16s;
+  }
+
+  button {
+    width: 100%;
+    text-align: left;
+    border: 0;
+    background: none;
+    padding: 9px 10px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    color: var(--text-2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+
+    &:hover {
+      background: var(--surface-2);
+      color: var(--text);
+    }
+  }
+  button.out {
+    color: #d93d42;
+  }
+}
+
+@keyframes acctIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
