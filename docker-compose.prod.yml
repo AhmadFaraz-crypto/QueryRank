@@ -1,0 +1,63 @@
+# QueryRank — production stack using the PUBLISHED image (no local build).
+#
+# Self-hosters: copy .env.example to .env, fill in the secrets, pin a version,
+# then:
+#
+#   QUERYRANK_VERSION=0.1.0 docker compose -f docker-compose.prod.yml up -d
+#
+# Upgrade later with:
+#
+#   docker compose -f docker-compose.prod.yml pull && \
+#   docker compose -f docker-compose.prod.yml up -d
+#
+# (The server runs pending database migrations on boot — they are idempotent.)
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: queryrank-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: queryrank
+      POSTGRES_PASSWORD: queryrank
+      POSTGRES_DB: queryrank
+    volumes:
+      - queryrank-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U queryrank']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    # Pin a version (QUERYRANK_VERSION=0.1.0) in production; `latest` is the default.
+    image: ghcr.io/ahmadfaraz-crypto/queryrank:${QUERYRANK_VERSION:-latest}
+    container_name: queryrank-app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # Talks to the postgres service over the internal network (port 5432).
+      DATABASE_URL: postgres://queryrank:queryrank@postgres:5432/queryrank
+      NODE_ENV: production
+      PORT: 3000
+      # The public URL the app is reached at — used for OAuth redirects + reset links.
+      OAUTH_REDIRECT_BASE: ${OAUTH_REDIRECT_BASE:-http://localhost:3000}
+      # Secrets (from your .env — see .env.example).
+      APP_SECRET: ${APP_SECRET:?set APP_SECRET in .env}
+      ALLOWED_EMAIL: ${ALLOWED_EMAIL:?set ALLOWED_EMAIL in .env}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      # Optional — password-reset emails via Resend.
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      EMAIL_FROM: ${EMAIL_FROM:-}
+    ports:
+      - '${APP_PORT:-3000}:3000'
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://localhost:3000/api/health || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  queryrank-pgdata:

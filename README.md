@@ -184,6 +184,14 @@ All server configuration lives in `apps/server/.env` (copy from `.env.example`):
 Only the three **Required** vars are needed to run (email/password sign-in + CSV
 import). Add Google for live data, and Resend for password-reset emails.
 
+### Deploying to production
+
+QueryRank builds into a **single container** (root `Dockerfile`) that serves the
+SPA + API and runs migrations on boot, so it deploys anywhere that runs a
+container + Postgres — **Google Cloud Run, Render, Railway, Fly.io**, or a VM via
+`docker compose up`. See **[DEPLOY.md](./DEPLOY.md)** for a step-by-step Google
+Cloud (Cloud Run + Cloud SQL) guide.
+
 ## Available scripts
 
 Run these from the repository root:

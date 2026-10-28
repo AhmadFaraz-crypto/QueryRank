@@ -153,6 +153,35 @@ pnpm --filter @queryrank/server db:generate   # creates a migration in apps/serv
 applies pending migrations automatically on boot, so no manual migrate step is
 needed to run locally.
 
+## Releasing (maintainers)
+
+CI runs lint + typecheck + tests + a Docker build on every PR and push to `main`.
+Releases are published as container images to
+`ghcr.io/ahmadfaraz-crypto/queryrank` by the **Release** workflow, triggered by a
+semver tag.
+
+To cut a release:
+
+1. Move the relevant `[Unreleased]` notes in [`CHANGELOG.md`](./CHANGELOG.md)
+   under a new dated version heading (e.g. `## [0.1.0] - 2026-10-28`). Call out
+   any new environment variables or breaking changes — self-hosters read this
+   before upgrading.
+2. Tag and push:
+
+   ```bash
+   git tag v0.1.0
+   git push origin v0.1.0
+   ```
+
+3. The workflow builds a multi-arch image and pushes
+   `ghcr.io/ahmadfaraz-crypto/queryrank:0.1.0`, `:0.1`, and `:latest`.
+4. Create a GitHub Release from the tag, pasting the changelog section.
+
+Self-hosters then upgrade by pinning the new version in
+`docker-compose.prod.yml` (`QUERYRANK_VERSION=0.1.0`) and running
+`docker compose -f docker-compose.prod.yml pull && … up -d`. Migrations run
+automatically on boot.
+
 ## Reporting security issues
 
 Please **do not** open a public issue for security vulnerabilities. Instead,
