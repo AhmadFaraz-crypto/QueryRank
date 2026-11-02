@@ -71,8 +71,16 @@ function ensure(ctx: ReturnType<typeof makeDoc>, needed: number) {
   }
 }
 
-function cover(ctx: ReturnType<typeof makeDoc>, title: string, domain: string, meta: string, intro: string) {
-  const { doc, M, contentW } = ctx
+function cover(
+  ctx: ReturnType<typeof makeDoc>,
+  title: string,
+  domain: string,
+  meta: string,
+  intro: string,
+  score: number,
+) {
+  const { doc, M, W, contentW } = ctx
+  scoreGauge(doc, W - M - 42, 104, 38, score)
   doc.setFont('helvetica', 'bold').setFontSize(13).setTextColor(...TEAL)
   doc.text('SEO AUDIT REPORT', M, 64)
   doc.setFont('helvetica', 'bold').setFontSize(28).setTextColor(...INK)
@@ -158,6 +166,101 @@ function table(ctx: ReturnType<typeof makeDoc>, cols: Col[], rows: Cell[][]) {
   ctx.y += 20
 }
 
+/** Draw a stroked arc from startDeg→endDeg (0deg = 3 o'clock, clockwise). */
+function arc(
+  doc: jsPDF,
+  cx: number,
+  cy: number,
+  r: number,
+  startDeg: number,
+  endDeg: number,
+  color: [number, number, number],
+  width: number,
+) {
+  doc.setDrawColor(...color).setLineWidth(width).setLineCap('round')
+  const steps = Math.max(2, Math.round(Math.abs(endDeg - startDeg) / 4))
+  let px = 0
+  let py = 0
+  for (let i = 0; i <= steps; i++) {
+    const a = ((startDeg + ((endDeg - startDeg) * i) / steps) * Math.PI) / 180
+    const x = cx + r * Math.cos(a)
+    const y = cy + r * Math.sin(a)
+    if (i > 0) doc.line(px, py, x, y)
+    px = x
+    py = y
+  }
+  doc.setLineWidth(0.2).setLineCap('butt')
+}
+
+/** A circular score gauge with the number in the middle. */
+function scoreGauge(doc: jsPDF, cx: number, cy: number, r: number, score: number) {
+  arc(doc, cx, cy, r, 0, 359.9, LINE, 9)
+  arc(doc, cx, cy, r, -90, -90 + (score / 100) * 360, scoreColor(score), 9)
+  doc.setFont('helvetica', 'bold').setFontSize(22).setTextColor(...INK)
+  doc.text(String(score), cx, cy + 4, { align: 'center' })
+  doc.setFont('helvetica', 'normal').setFontSize(7.5).setTextColor(...MUTE)
+  doc.text('/ 100', cx, cy + 16, { align: 'center' })
+}
+
+/** A stacked passed/warnings/errors bar with a legend. */
+function severityBar(ctx: ReturnType<typeof makeDoc>, counts: { good: number; warning: number; error: number }) {
+  const { doc, M, contentW } = ctx
+  const total = counts.good + counts.warning + counts.error || 1
+  const h = 14
+  ensure(ctx, 44)
+  let x = M
+  const seg: Array<[number, [number, number, number]]> = [
+    [counts.good, SEV.good],
+    [counts.warning, SEV.warning],
+    [counts.error, SEV.error],
+  ]
+  seg.forEach(([v, c]) => {
+    const w = (v / total) * contentW
+    if (w <= 0) return
+    doc.setFillColor(...c).rect(x, ctx.y, w, h, 'F')
+    x += w
+  })
+  ctx.y += h + 12
+  // legend
+  const items: Array<[string, number, [number, number, number]]> = [
+    ['Passed', counts.good, SEV.good],
+    ['Warnings', counts.warning, SEV.warning],
+    ['Errors', counts.error, SEV.error],
+  ]
+  let lx = M
+  items.forEach(([label, v, c]) => {
+    doc.setFillColor(...c).circle(lx + 3, ctx.y - 2, 3, 'F')
+    doc.setFont('helvetica', 'normal').setFontSize(9).setTextColor(...INK2)
+    const t = `${label}  ${v}`
+    doc.text(t, lx + 10, ctx.y + 1)
+    lx += doc.getTextWidth(t) + 34
+  })
+  ctx.y += 18
+}
+
+/** A horizontal bar chart: each item a labelled bar coloured by severity. */
+function hBarChart(
+  ctx: ReturnType<typeof makeDoc>,
+  items: Array<{ label: string; value: number; color: [number, number, number] }>,
+  max: number,
+) {
+  const { doc, M, contentW } = ctx
+  const labelW = contentW * 0.34
+  const barMaxW = contentW * 0.56
+  const m = Math.max(max, 1)
+  for (const it of items) {
+    ensure(ctx, 22)
+    doc.setFont('helvetica', 'normal').setFontSize(9).setTextColor(...INK)
+    doc.text((doc.splitTextToSize(it.label, labelW - 8) as string[])[0], M, ctx.y + 9)
+    doc.setFillColor(...ZEBRA).roundedRect(M + labelW, ctx.y + 1, barMaxW, 11, 2, 2, 'F')
+    doc.setFillColor(...it.color).roundedRect(M + labelW, ctx.y + 1, Math.max(3, (it.value / m) * barMaxW), 11, 2, 2, 'F')
+    doc.setFont('helvetica', 'bold').setFontSize(9).setTextColor(...INK)
+    doc.text(String(it.value), M + contentW, ctx.y + 9, { align: 'right' })
+    ctx.y += 18
+  }
+  ctx.y += 10
+}
+
 // ---------------------------------------------------------------------------
 // Single-page report
 // ---------------------------------------------------------------------------
@@ -175,10 +278,12 @@ export function buildAuditPdf(report: AuditReport): { doc: jsPDF; filename: stri
     report.finalUrl,
     meta,
     `This report checks ${host} against ${total} on-page SEO signals across indexability, metadata, content, social sharing and technical health. Each finding below includes what was detected and, where relevant, a recommended fix.`,
+    report.score,
   )
 
   // 1. Executive summary
   section(ctx, 1, 'Executive summary')
+  severityBar(ctx, report.counts)
   const sc = scoreColor(report.score)
   table(
     ctx,
@@ -243,10 +348,12 @@ export function buildSitePdf(report: SiteReport): { doc: jsPDF; filename: string
     `QueryRank crawled ${report.pagesCrawled} page${report.pagesCrawled > 1 ? 's' : ''} of ${host}${
       report.capped ? ` (of ${report.pagesDiscovered} discovered; bounded to 30)` : ''
     } and checked each against the on-page SEO signals below. This report summarizes the site-wide picture, the issues that recur most often, and a page-by-page breakdown with fixes.`,
+    report.avgScore,
   )
 
   // 1. Executive summary
   section(ctx, 1, 'Executive summary')
+  severityBar(ctx, report.counts)
   const sc = scoreColor(report.avgScore)
   const top = report.commonIssues[0]
   table(
@@ -266,28 +373,35 @@ export function buildSitePdf(report: SiteReport): { doc: jsPDF; filename: string
     ],
   )
 
-  // 2. Most common issues
+  let s = 2
+
+  // Most common issues — horizontal bar chart (bars relative to pages crawled).
   if (report.commonIssues.length) {
-    section(ctx, 2, 'Most common issues')
-    table(
+    section(ctx, s++, 'Most common issues')
+    hBarChart(
       ctx,
-      [
-        { header: 'Status', w: 0.12 },
-        { header: 'Issue', w: 0.4 },
-        { header: 'Category', w: 0.28 },
-        { header: 'Pages', w: 0.2, align: 'right' },
-      ],
-      report.commonIssues.map((i) => [
-        { pill: i.severity },
-        { text: i.label, bold: true },
-        i.category,
-        { text: String(i.pages), align: 'right' },
-      ]),
+      report.commonIssues.map((i) => ({ label: i.label, value: i.pages, color: SEV[i.severity] })),
+      report.pagesCrawled,
     )
   }
 
-  // 3. Page-by-page
-  section(ctx, report.commonIssues.length ? 3 : 2, 'Pages (worst first)')
+  // Score distribution — how many pages fall in each score band.
+  const scored = report.pages.filter((p) => p.checks.length)
+  if (scored.length) {
+    section(ctx, s++, 'Score distribution')
+    hBarChart(
+      ctx,
+      [
+        { label: 'Good (80–100)', value: scored.filter((p) => p.score >= 80).length, color: SEV.good },
+        { label: 'Needs work (50–79)', value: scored.filter((p) => p.score >= 50 && p.score < 80).length, color: SEV.warning },
+        { label: 'Poor (0–49)', value: scored.filter((p) => p.score < 50).length, color: SEV.error },
+      ],
+      scored.length,
+    )
+  }
+
+  // Page-by-page breakdown.
+  section(ctx, s, 'Pages (worst first)')
   for (const p of report.pages) {
     const issues = p.error ? [] : p.checks.filter((c) => c.severity !== 'good')
     ensure(ctx, 36)
