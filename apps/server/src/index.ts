@@ -4,6 +4,7 @@ import { Hono } from 'hono'
 import { ensureDatabase, runMigrations } from './db/bootstrap'
 import { env, googleConfigured } from './env'
 import { auth } from './routes/auth'
+import { auditsRouter, siteAuditsRouter } from './routes/audits'
 import { connectionsRouter } from './routes/connections'
 import { dashboardsRouter } from './routes/dashboards'
 import { datasetsRouter } from './routes/datasets'
@@ -32,6 +33,8 @@ app.route('/api/auth', auth)
 app.route('/api/connections', connectionsRouter)
 app.route('/api/dashboards', dashboardsRouter)
 app.route('/api/datasets', datasetsRouter)
+app.route('/api/audits', auditsRouter)
+app.route('/api/site-audits', siteAuditsRouter)
 
 // Any unmatched /api path stays a JSON 404 (never the SPA shell).
 app.all('/api/*', (c) => c.json({ error: 'not found' }, 404))

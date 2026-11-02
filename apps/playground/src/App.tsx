@@ -13,6 +13,8 @@ import { Reset } from './ui/auth/Reset'
 
 // Code-split the designer (and the chart engine) out of the initial bundle.
 const Designer = lazy(() => import('./ui/Designer').then((m) => ({ default: m.Designer })))
+// Code-split the SEO audit page (pulls in the PDF generator) too.
+const SeoAudit = lazy(() => import('./ui/SeoAudit').then((m) => ({ default: m.SeoAudit })))
 
 // One store shared by the auth pages and the app, so signing in on /login
 // carries straight into the guarded routes.
@@ -58,6 +60,14 @@ export function App() {
               }
             />
             <Route path="data" element={<DataSources />} />
+            <Route
+              path="audit"
+              element={
+                <Suspense fallback={null}>
+                  <SeoAudit />
+                </Suspense>
+              }
+            />
             <Route path="*" element={<Navigate to="/dashboards" replace />} />
           </Route>
         </Route>

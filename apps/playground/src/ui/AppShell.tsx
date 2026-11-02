@@ -23,6 +23,11 @@ const RAIL: RailItem[] = [
     paths:
       '<ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v12c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12c0 1.7 3.1 3 7 3s7-1.3 7-3"/>',
   },
+  {
+    to: '/audit',
+    tip: 'SEO audit',
+    paths: '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/><path d="M8 11l2 2 4-4"/>',
+  },
 ]
 
 function initials(n: string) {
