@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useStore } from './AppStore'
+import { AccountSettings } from './AccountSettings'
 import { ErrorBoundary } from './ErrorBoundary'
 import styles from './AppShell.module.scss'
 
@@ -45,6 +46,7 @@ function initials(n: string) {
 function Shell() {
   const { user, signOut } = useStore()
   const [menu, setMenu] = useState(false)
+  const [settings, setSettings] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   const location = useLocation()
   // The designer is a focused full-screen workspace — hide the app nav there
@@ -132,14 +134,14 @@ function Shell() {
           </button>
 
           <div ref={menuRef} className={`${styles.acct} ${menu ? styles.acctOn : ''}`}>
-            <button type="button" onClick={() => setMenu(false)}>
-              Brand kit
-            </button>
-            <button type="button" onClick={() => setMenu(false)}>
+            <button
+              type="button"
+              onClick={() => {
+                setMenu(false)
+                setSettings(true)
+              }}
+            >
               Account settings
-            </button>
-            <button type="button" onClick={() => setMenu(false)}>
-              Switch workspace
             </button>
             <button
               type="button"
@@ -159,6 +161,8 @@ function Shell() {
       <ErrorBoundary key={location.pathname}>
         <Outlet />
       </ErrorBoundary>
+
+      {settings && <AccountSettings onClose={() => setSettings(false)} />}
     </div>
   )
 }

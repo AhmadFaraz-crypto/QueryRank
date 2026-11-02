@@ -86,8 +86,12 @@ interface StoreValue {
   // auth
   authed: boolean
   authReady: boolean
-  user: { name: string; email: string; ws: string }
+  user: { name: string; email: string; ws: string; hasPassword: boolean }
   signOut: () => void
+  /** Update the signed-in user's display name. Rejects with a message on failure. */
+  updateName: (name: string) => Promise<void>
+  /** Change (or set) the signed-in user's password. `current` may be omitted for Google-only accounts. */
+  changePassword: (currentPassword: string | undefined, newPassword: string) => Promise<void>
   /** Email + password sign-in. Rejects with a user-facing message on failure. */
   loginWithPassword: (email: string, password: string) => Promise<void>
   /** Create the owner account with a password. Rejects with a message on failure. */
@@ -214,7 +218,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
   // False until the initial /api/auth/me session check resolves, so the route
   // guard doesn't bounce a logged-in user to /login before the check finishes.
   const [authReady, setAuthReady] = useState(false)
-  const [user, setUser] = useState({ name: '', email: '', ws: '' })
+  const [user, setUser] = useState({ name: '', email: '', ws: '', hasPassword: false })
   const signOut = useCallback(() => {
     void fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }).catch(
       () => {},
@@ -432,7 +436,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       })
       const body = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(body.error || 'Sign in failed.')
-      setUser({ name: body.name || body.email || email, email: body.email || email, ws: '' })
+      setUser({ name: body.name || body.email || email, email: body.email || email, ws: '', hasPassword: true })
       setAuthed(true)
       await loadWorkspace()
       navigate('/dashboards')
@@ -450,7 +454,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       })
       const body = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(body.error || 'Could not create your account.')
-      setUser({ name: body.name || name, email: body.email || email, ws: '' })
+      setUser({ name: body.name || name, email: body.email || email, ws: '', hasPassword: true })
       setAuthed(true)
       await loadWorkspace()
       navigate('/dashboards')
@@ -501,12 +505,12 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
         setAuthReady(true)
         return
       }
-      const u = (await r.json()) as { name?: string; email?: string }
+      const u = (await r.json()) as { name?: string; email?: string; hasPassword?: boolean }
       if (!u?.email) {
         setAuthReady(true)
         return
       }
-      setUser({ name: u.name || u.email, email: u.email, ws: '' })
+      setUser({ name: u.name || u.email, email: u.email, ws: '', hasPassword: !!u.hasPassword })
       setAuthed(true)
       setAuthReady(true)
       await loadWorkspace()
@@ -527,6 +531,30 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
   const retryData = useCallback(() => {
     void checkSession()
   }, [checkSession])
+
+  const updateName = useCallback(async (name: string) => {
+    const res = await fetch('/api/auth/me', {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name }),
+    })
+    const body = await res.json().catch(() => ({}))
+    if (!res.ok) throw new Error(body.error || 'Could not update your name.')
+    setUser((u) => ({ ...u, name: body.name || name }))
+  }, [])
+
+  const changePassword = useCallback(async (currentPassword: string | undefined, newPassword: string) => {
+    const res = await fetch('/api/auth/password/change', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ currentPassword, newPassword }),
+    })
+    const body = await res.json().catch(() => ({}))
+    if (!res.ok) throw new Error(body.error || 'Could not change your password.')
+    setUser((u) => ({ ...u, hasPassword: true }))
+  }, [])
 
   const newBlank = useCallback(async () => {
     const d: Dashboard = {
@@ -567,6 +595,8 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
         authReady,
         user,
         signOut,
+        updateName,
+        changePassword,
         loginWithPassword,
         registerWithPassword,
         requestPasswordReset,

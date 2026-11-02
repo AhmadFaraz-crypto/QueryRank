@@ -227,5 +227,50 @@ auth.get('/me', async (c) => {
   const rows = await db.select().from(users).where(eq(users.id, session.sub)).limit(1)
   const user = rows[0]
   if (!user) return c.json({ error: 'unauthorized' }, 401)
-  return c.json({ id: user.id, email: user.email, name: user.name, avatar: user.avatar })
+  return c.json({
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    avatar: user.avatar,
+    hasPassword: !!user.passwordHash,
+  })
+})
+
+// Update the signed-in user's display name.
+auth.patch('/me', async (c) => {
+  const session = await getSession(c)
+  if (!session) return c.json({ error: 'unauthorized' }, 401)
+  const { name } = (await c.req.json().catch(() => ({}))) as { name?: string }
+  const nm = String(name ?? '').trim()
+  if (!nm) return c.json({ error: 'Name can’t be empty.' }, 400)
+  if (nm.length > 80) return c.json({ error: 'Name is too long.' }, 400)
+  const [user] = await db.update(users).set({ name: nm }).where(eq(users.id, session.sub)).returning()
+  if (!user) return c.json({ error: 'unauthorized' }, 401)
+  return c.json({ id: user.id, email: user.email, name: user.name })
+})
+
+// Change (or, for a Google-only account, set) the signed-in user's password.
+auth.post('/password/change', async (c) => {
+  const session = await getSession(c)
+  if (!session) return c.json({ error: 'unauthorized' }, 401)
+  const { currentPassword, newPassword } = (await c.req.json().catch(() => ({}))) as {
+    currentPassword?: string
+    newPassword?: string
+  }
+  if (typeof newPassword !== 'string' || newPassword.length < MIN_PASSWORD) {
+    return c.json({ error: `New password must be at least ${MIN_PASSWORD} characters.` }, 400)
+  }
+  const user = (await db.select().from(users).where(eq(users.id, session.sub)).limit(1))[0]
+  if (!user) return c.json({ error: 'unauthorized' }, 401)
+
+  // If a password is already set, the current one must be provided and correct.
+  // Google-only accounts (no password yet) may set one without a current password.
+  if (user.passwordHash) {
+    const ok =
+      typeof currentPassword === 'string' && (await verifyPassword(currentPassword, user.passwordHash))
+    if (!ok) return c.json({ error: 'Your current password is incorrect.' }, 403)
+  }
+
+  await db.update(users).set({ passwordHash: await hashPassword(newPassword) }).where(eq(users.id, user.id))
+  return c.json({ ok: true, hasPassword: true })
 })
