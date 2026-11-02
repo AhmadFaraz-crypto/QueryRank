@@ -4,6 +4,13 @@
 export type Severity = 'good' | 'warning' | 'error'
 export type Category = 'Indexability' | 'Meta' | 'Content' | 'Social' | 'Technical'
 
+export interface Counts {
+  good: number
+  warning: number
+  error: number
+  total: number
+}
+
 export interface Check {
   id: string
   category: Category

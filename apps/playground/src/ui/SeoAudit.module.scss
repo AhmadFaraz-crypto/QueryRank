@@ -167,6 +167,144 @@
   --sev: #d14343;
 }
 
+/* ---------- severity bar ---------- */
+.sevbar {
+  margin: 12px 0 2px;
+}
+.sevtrack {
+  display: flex;
+  height: 12px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--surface-2, #f5f6f8);
+}
+.sevtrack span {
+  background: var(--sev);
+  height: 100%;
+}
+.sevlegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+  margin-top: 11px;
+  font-size: 13px;
+  color: var(--text-2);
+}
+.sevlegend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.sevlegend i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--sev);
+}
+.sevlegend b {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+/* ---------- horizontal bar chart ---------- */
+.barchart {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+.barchart li {
+  display: grid;
+  grid-template-columns: 190px 1fr 36px;
+  align-items: center;
+  gap: 14px;
+}
+.barlabel {
+  font-size: 14px;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.bartrack {
+  height: 13px;
+  border-radius: 7px;
+  background: var(--surface-2, #f5f6f8);
+  overflow: hidden;
+}
+.barfill {
+  display: block;
+  height: 100%;
+  background: var(--sev);
+  border-radius: 7px;
+  transition: width 0.5s ease;
+}
+.barval {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  text-align: right;
+}
+@media (max-width: 620px) {
+  .barchart li {
+    grid-template-columns: 110px 1fr 30px;
+    gap: 10px;
+  }
+  .barlabel {
+    font-size: 13px;
+  }
+}
+
+/* ---------- findings table ---------- */
+.tableWrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.findings {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.findings thead th {
+  background: #1a212e;
+  color: #fff;
+  text-align: left;
+  font-weight: 700;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 11px 14px;
+  white-space: nowrap;
+}
+.findings th:first-child,
+.findings td:first-child {
+  width: 66px;
+}
+.findings th:nth-child(2),
+.findings td:nth-child(2) {
+  width: 160px;
+}
+.findings tbody tr:nth-child(even) {
+  background: var(--surface-2, #f5f6f8);
+}
+.findings td {
+  padding: 12px 14px;
+  vertical-align: top;
+  color: var(--text-2);
+}
+.findings .cname {
+  font-weight: 650;
+  color: var(--ink);
+}
+.findings .fix {
+  display: block;
+  margin-top: 5px;
+  color: var(--sev);
+  font-weight: 600;
+}
+
 /* ---------- report summary ---------- */
 .report {
   margin-top: 26px;
@@ -389,11 +527,10 @@
     border-top: 1px solid var(--line);
   }
 
-  .checks {
+  .tableWrap {
     border: none;
     border-top: 1px solid var(--line);
     border-radius: 0;
-    background: var(--surface-2, #f5f6f8);
   }
 }
 .pageRow {
