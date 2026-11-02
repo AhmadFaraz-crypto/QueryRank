@@ -22,6 +22,20 @@
       "when": 1793105624003,
       "tag": "0002_orange_blue_blade",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793610048604,
+      "tag": "0003_flashy_black_tarantula",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793611537236,
+      "tag": "0004_sleepy_skin",
+      "breakpoints": true
     }
   ]
 }

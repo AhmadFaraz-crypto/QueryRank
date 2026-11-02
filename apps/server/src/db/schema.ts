@@ -1,4 +1,4 @@
-import { jsonb, pgTable, primaryKey, text, timestamp, uuid } from 'drizzle-orm/pg-core'
+import { integer, jsonb, pgTable, primaryKey, text, timestamp, uuid } from 'drizzle-orm/pg-core'
 
 /** The account(s) allowed to use this instance. Single-user for now. */
 export const users = pgTable('users', {
@@ -80,8 +80,43 @@ export const datasets = pgTable(
   (t) => ({ pk: primaryKey({ columns: [t.userId, t.id] }) }),
 )
 
+/**
+ * A saved SEO audit: the user enters a URL, we fetch and analyze the page, and
+ * store the full report (score + checks + extracted facts) as JSON so it can be
+ * re-opened and re-exported to PDF without re-running the crawl.
+ */
+export const seoAudits = pgTable('seo_audits', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  url: text('url').notNull(),
+  finalUrl: text('final_url').notNull().default(''),
+  score: integer('score').notNull().default(0),
+  report: jsonb('report').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+/**
+ * A saved whole-site SEO crawl: the aggregated report (average score, per-page
+ * results, recurring issues) for a bounded crawl of a site, stored as JSON.
+ */
+export const siteAudits = pgTable('site_audits', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  site: text('site').notNull(),
+  pagesCrawled: integer('pages_crawled').notNull().default(0),
+  avgScore: integer('avg_score').notNull().default(0),
+  report: jsonb('report').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
 export type User = typeof users.$inferSelect
 export type Connection = typeof connections.$inferSelect
 export type Dashboard = typeof dashboards.$inferSelect
 export type DatasetRow = typeof datasets.$inferSelect
 export type PasswordResetToken = typeof passwordResetTokens.$inferSelect
+export type SeoAuditRow = typeof seoAudits.$inferSelect
+export type SiteAuditRow = typeof siteAudits.$inferSelect
